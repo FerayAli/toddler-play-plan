@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Play plan, 1.5 to 3 years</title>
+<style>
+  :root {
+    --paper: #f4efe6;
+    --ink: #1c1915;
+    --muted: #5c564c;
+    --line: #e2d8c8;
+    --card: #fffcf7;
+    --accent: #0f5c4c;
+    --mark: #f3e2a4;
+    --move: #0f5c4c;
+    --brain: #3a4678;
+    --warn-bg: #f8efe2;
+    --warn: #6a4b16;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 16px/1.5 "Liberation Serif", "Noto Serif", Georgia, "Times New Roman", serif;
+  }
+  button, input { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+  .wrap { width: min(980px, calc(100% - 32px)); margin: 0 auto; }
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(244, 239, 230, 0.94);
+    border-bottom: 1px solid var(--line);
+    backdrop-filter: blur(8px);
+  }
+  .top-inner { padding: 16px 0 14px; }
+  .title-line { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  h1 {
+    font-size: 1.55rem;
+    line-height: 1.2;
+    font-weight: 650;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+  .lede { margin: 0 0 12px; color: var(--muted); font-size: 0.95rem; }
+  form.search {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  label.sr {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); border: 0;
+  }
+  input[type="search"] {
+    flex: 1;
+    min-width: 0;
+    background: var(--card);
+    border: 1px solid #cfc3b0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  input[type="search"]:focus { border-color: var(--accent); }
+  button.clear, button.chip {
+    background: var(--card);
+    border: 1px solid #cfc3b0;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  button.clear { border-radius: 10px; padding: 10px 12px; }
+  button.chip[aria-pressed="true"] {
+    background: var(--ink);
+    color: #f7f3ec;
+    border-color: var(--ink);
+  }
+  button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .filters .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .filters .label { color: var(--muted); font-size: 0.82rem; font-family: system-ui, sans-serif; }
+  .hint, .status, .syntax {
+    font-family: system-ui, sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .status { margin: 8px 0 0; min-height: 1.2em; }
+  .syntax { margin: 6px 0 0; }
+  main { padding: 22px 0 64px; }
+  .section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+  }
+  .section-nav a, .toc a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .section-nav a {
+    font-family: system-ui, sans-serif;
+    font-size: 0.92rem;
+    background: var(--card);
+    border: 1px solid #cfc3b0;
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .section-nav a.active {
+    background: var(--ink);
+    color: #f7f3ec;
+    border-color: var(--ink);
+  }
+  .jump-label {
+    font-family: system-ui, sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .band-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .band-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .band-actions button {
+    font-family: system-ui, sans-serif;
+    font-size: 0.78rem;
+    background: var(--card);
+    border: 1px solid #cfc3b0;
+    border-radius: 999px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  .band { margin: 0 0 28px; scroll-margin-top: 140px; }
+  .game-card { scroll-margin-top: 140px; position: relative; }
+  .open-hint {
+    margin: 6px 0 0;
+    font-family: system-ui, sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  details.game:not([open]) .open-hint { display: block; }
+  details.game[open] .open-hint { display: none; }
+  .chev {
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    flex: 0 0 28px;
+    transition: transform 0.15s ease;
+  }
+  details.game[open] .chev { transform: rotate(180deg); }
+  .to-top {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 3;
+    border: 1px solid #cfc3b0;
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .to-top.show { opacity: 1; pointer-events: auto; }
+  header.top.compact .lede,
+  header.top.compact .syntax,
+  header.top.compact .filters { display: none; }
+  header.top.compact .top-inner { padding: 10px 0; }
+  header.top.compact h1 { font-size: 1.15rem; margin: 0; }
+  .toc {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0 0 14px;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .toc h3 {
+    margin: 0 0 6px;
+    font-family: system-ui, sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .toc a { display: block; padding: 4px 0; }
+  .toc a.move { color: var(--move); }
+  .toc a.brain { color: var(--brain); }
+  details.game > summary { list-style: none; cursor: pointer; }
+  details.game > summary::-webkit-details-marker { display: none; }
+  details.game > summary .sum {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-right: 96px;
+  }
+  details.game > summary .scene {
+    width: 112px;
+    height: 84px;
+    flex: 0 0 112px;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+  details.game[open] > summary .sum { align-items: flex-start; flex-wrap: wrap; }
+  details.game[open] > summary .scene {
+    width: 100%;
+    height: auto;
+    flex-basis: 100%;
+    aspect-ratio: 4 / 3;
+    margin: 0 0 8px;
+  }
+  .game-body { margin-top: 12px; }
+  .game-card .tried {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1;
+    background: var(--card);
+    border-radius: 999px;
+    padding: 4px 8px;
+  }
+  .band h2 { font-size: 1.25rem; margin: 0 0 4px; }
+  .span { color: var(--muted); font-size: 0.85rem; font-family: system-ui, sans-serif; margin: 0 0 8px; }
+  .ready, .week { margin: 0 0 12px; }
+  .week { color: var(--muted); }
+  .grid { display: grid; gap: 12px; }
+  .game-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+  }
+  .scene {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    margin: 0 0 12px;
+    background: #efe8dc;
+  }
+  .game-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .game h3 { margin: 0; font-size: 1.05rem; }
+  .meta { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 8px; }
+  .tag {
+    font-family: system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+  }
+  .tag.move { color: var(--move); border-color: #b7d4cb; }
+  .tag.brain { color: var(--brain); border-color: #c9d0e8; }
+  .title-row { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+  .badge {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+  }
+  .badge.move { background: #e5f2ee; color: var(--move); }
+  .badge.brain { background: #e8ebf6; color: var(--brain); }
+  .badge svg, .chip svg, .fact svg, .band-title svg { display: block; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .search-wrap { position: relative; flex: 1; min-width: 0; }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+  input[type="search"] { width: 100%; padding-left: 36px; }
+  .band-title { display: flex; gap: 10px; align-items: center; }
+  .band-title h2 { margin: 0; }
+  .steps {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .steps li { display: grid; grid-template-columns: 24px 1fr; gap: 8px; align-items: start; }
+  .num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #f7f3ec;
+    font: 600 12px/24px system-ui, sans-serif;
+    text-align: center;
+  }
+  .say {
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    background: #f6f1e6;
+    border-radius: 8px;
+  }
+  .say b {
+    font-family: system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 6px;
+  }
+  .facts { display: grid; gap: 6px; }
+  .fact { display: flex; gap: 8px; align-items: flex-start; font-size: 0.92rem; }
+  .fact svg { color: var(--muted); margin-top: 2px; flex: 0 0 auto; }
+  dl { margin: 0; display: grid; gap: 4px; }
+  .rowline { display: grid; grid-template-columns: 92px 1fr; gap: 8px; font-size: 0.92rem; }
+  dt { color: var(--muted); font-family: system-ui, sans-serif; font-size: 0.75rem; padding-top: 3px; }
+  dd { margin: 0; }
+  mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2px; }
+  .tried {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-family: system-ui, sans-serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .empty {
+    background: var(--card);
+    border: 1px dashed #cfc3b0;
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .note {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 8px;
+  }
+  .note strong { display: block; margin-bottom: 4px; }
+  .kit { color: var(--muted); font-size: 0.92rem; margin-top: 14px; }
+  @media (max-width: 640px) {
+    .rowline { grid-template-columns: 1fr; gap: 0; }
+    form.search { flex-direction: column; align-items: stretch; }
+    .toc { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="title-line">
+      <h1 id="page-title">Play plan, 1.5 to 3 years</h1>
+      <div class="group" role="group" aria-label="Language">
+        <button class="chip" type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button class="chip" type="button" data-lang="bg" aria-pressed="false">BG</button>
+      </div>
+    </div>
+    <p class="lede" id="page-lede">Thirty short games. Nothing to buy. Search by skill, object, or age.</p>
+    <form class="search" role="search" id="search-form">
+      <label class="sr" for="q">Search games</label>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/></svg>
+        <input id="q" type="search" name="q" placeholder="Search balance, socks, language, stairs…" autocomplete="off" enterkeyhint="search" />
+      </div>
+      <button class="clear" type="button" id="clear">Clear</button>
+    </form>
+    <div class="filters">
+      <div class="group" role="group" aria-label="Age" id="age-group">
+        <span class="label" id="age-label">Age</span>
+        <button class="chip" type="button" data-age="a18" aria-pressed="false">1.5–2</button>
+        <button class="chip" type="button" data-age="a24" aria-pressed="false">2–2.5</button>
+        <button class="chip" type="button" data-age="a30" aria-pressed="false">2.5–3</button>
+      </div>
+      <div class="group" role="group" aria-label="Kind" id="kind-group">
+        <span class="label" id="kind-label">Kind</span>
+        <button class="chip" type="button" data-kind="movement" aria-pressed="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="5" r="1.5"/><path d="M12 8v5l-3 4M12 13l3 4M9 11h6"/></svg><span id="label-movement">Movement</span></button>
+        <button class="chip" type="button" data-kind="brain" aria-pressed="false"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M9 7a3 3 0 0 1 5-1 3 3 0 0 1 4 3c1 1 1 3 0 4a3 3 0 0 1-2 5H9a3 3 0 0 1-2-5 3 3 0 0 1 2-6z"/></svg><span id="label-brain">Brain</span></button>
+      </div>
+    </div>
+    <p class="status" id="status" aria-live="polite"></p>
+    <p class="syntax" id="page-syntax">Also works in the box: <code>age:2.5</code> <code>kind:brain</code> <code>need:socks</code>. Press / to focus search.</p>
+    <nav class="section-nav" id="section-nav" aria-label="Sections"></nav>
+  </div>
+</header>
+<main>
+  <div class="wrap" id="results"></div>
+  <button type="button" class="to-top" id="to-top" aria-label="Top">Top</button>
+  <div class="wrap">
+    <div class="note">
+      <strong id="note-title">Stay close</strong>
+      <span id="note-body">Hold a hand on stairs and stay beside the couch for climbs. Balls, sock-balls, and toys must be too big to fit in the mouth. Skip marbles, coins, beads, and bottle caps. If they peel painter’s tape, the game is over for the day. Children learn these skills on different clocks; if walking or words feel far behind other children the same age, ask the pediatrician.</span>
+    </div>
+    <p class="kit" id="page-kit">Household kit: cushions, laundry basket, painter’s tape, kitchen towel, socks, a soft ball, a cardboard box, a pot and wooden spoon, two cups, a picture book, a stuffed animal, three lidded containers.</p>
+  </div>
+</main>
+<script>
+function svg(body) {
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+const ICONS = {
+  walk: svg('<circle cx="12" cy="5" r="1.6"/><path d="M12 8v5l-3 4M12 13l3 4M9 11h6"/>'),
+  ball: svg('<circle cx="12" cy="12" r="6.5"/><path d="M12 5.5c2 2 2 9 0 13M5.5 12h13"/>'),
+  box: svg('<path d="M4 8l8-4 8 4-8 4-8-4z"/><path d="M4 8v8l8 4 8-4V8"/><path d="M12 12v8"/>'),
+  stairs: svg('<path d="M4 19h5v-4h5V11h6"/>'),
+  music: svg('<path d="M9 17.5a2 2 0 1 1-1.6-2V7l10-2v8.5"/><circle cx="17.2" cy="13.5" r="2"/>'),
+  cup: svg('<path d="M7 8h8l-.8 9H7.8L7 8z"/><path d="M15 9.5h2a2 2 0 0 1 0 4h-2"/>'),
+  point: svg('<path d="M4 12h9"/><path d="M11 8l5 4-5 4"/><circle cx="6" cy="6.5" r="1.3"/>'),
+  check: svg('<circle cx="12" cy="12" r="8"/><path d="M8 12.2l2.4 2.4L16.2 9"/>'),
+  drum: svg('<ellipse cx="12" cy="9" rx="7" ry="2.6"/><path d="M5 9v6c0 1.6 3.1 2.8 7 2.8s7-1.2 7-2.8V9"/>'),
+  book: svg('<path d="M12 7v12"/><path d="M12 7c-2-1.4-5-1.2-7 .2v12c2-1.4 5-1.6 7-.2 2-1.4 5-1.2 7 .2V7.2c-2-1.4-5-1.6-7-.2z"/>'),
+  tape: svg('<path d="M3 10h18M3 14h18"/><path d="M8 10v4M16 10v4"/>'),
+  animal: svg('<circle cx="8" cy="11" r="2.2"/><circle cx="16" cy="11" r="2.2"/><path d="M6.5 16.5c1.2 1.8 3 2.6 5.5 2.6s4.3-.8 5.5-2.6"/><path d="M8 9V6M16 9V6"/>'),
+  kick: svg('<circle cx="16" cy="6.5" r="1.8"/><path d="M7 18l3.2-5.2 2.6 1.6 2.8 3.6"/><path d="M10 13l-3-1"/>'),
+  bear: svg('<circle cx="12" cy="13" r="5"/><circle cx="7.5" cy="8" r="2"/><circle cx="16.5" cy="8" r="2"/><path d="M10.5 13.5h.2M13.3 13.5h.2"/>'),
+  climb: svg('<path d="M7 20V11l5-5 5 5v9"/><path d="M7 15h10"/>'),
+  sort: svg('<path d="M5 7h6M5 12h10M5 17h14"/>'),
+  words: svg('<path d="M5 8h7M5 12h12M5 16h9"/>'),
+  body: svg('<circle cx="12" cy="5" r="2"/><path d="M12 8v6M8 11.5h8M9.2 20L12 14l2.8 6"/>'),
+  lid: svg('<path d="M5 10h14"/><path d="M8 10v7h8v-7"/><path d="M10 7.5h4"/>'),
+  line: svg('<path d="M3 16c2.5-5 4.5-5 7 0s4.5 5 7 0 4.5-5 4 0"/>'),
+  jump: svg('<circle cx="12" cy="5" r="1.6"/><path d="M12 8l-2.2 4h4.4L12 17"/><path d="M6 19h12"/>'),
+  target: svg('<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3.2"/>'),
+  color: svg('<circle cx="8" cy="10" r="2.6"/><circle cx="14.5" cy="9" r="2.6"/><circle cx="12" cy="15" r="2.6"/>'),
+  story: svg('<path d="M7 5h7l4 4v10H7z"/><path d="M14 5v4h4"/>'),
+  count: svg('<path d="M6 17V7h3M12 7v10M16 7h3v10h-3"/>'),
+  bag: svg('<path d="M8 9h8l1 11H7L8 9z"/><path d="M9 9a3 3 0 0 1 6 0"/>'),
+  errand: svg('<path d="M4 12h11"/><path d="M12 8l4 4-4 4"/>'),
+  sprout: svg('<path d="M12 20V11"/><path d="M12 13c-3-1-4-4-4-6 3 0 5 2 4 6z"/><path d="M12 14c3-1 5-3 5-6-3 0-5 2-5 6z"/>'),
+  home: svg('<path d="M4 11l8-6 8 6"/><path d="M7 10.5V19h10v-8.5"/>')
+};
+
+const AGES = [
+  {
+    id: "a18",
+    label: "1.5–2 years",
+    span: "18–24 months",
+    aliases: ["1.5", "18", "toddler", "1"],
+    ready: "Most children this age walk, squat, and climb onto a low couch. Words are few. They learn by doing one thing at a time, with you right there copying and naming it.",
+    week: "Repeat Cushion road, Roll into the basket, Two-cup hide, and One job. Same four games all week. Familiar is easier, and repetition is the lesson.",
+    games: [
+      { id: "m18-cushion", kind: "movement", icon: "climb", name: "Cushion road",
+        steps: [
+          "Pull three couch cushions onto the floor so they touch in a straight line.",
+          "Stand at one end and pat the first cushion so they know where to start.",
+          "Hold one hand. Let them crawl or step onto the first cushion.",
+          "Stay beside them across all three. Each time a foot lands, say the word once.",
+          "At the far end, turn them around and come back the same way.",
+          "Stop after two trips. Clap once so the game has a clear ending."
+        ],
+        say: "Over.",
+        builds: "Balance, climbing, knowing where the body is in space", need: "Couch cushions", tags: "walk crawl climb pillow" },
+      { id: "m18-basket", kind: "movement", icon: "ball", name: "Roll into the basket",
+        steps: [
+          "Sit on the floor. Set a laundry basket about one arm’s length away.",
+          "Use a soft ball, or knot two socks together so the ball is big.",
+          "Roll the ball yourself once, slowly, so it stops inside the basket.",
+          "Hand them the ball with both of their hands on it. Point at the basket.",
+          "If they miss, slide the basket closer. Do not add a score.",
+          "Take three turns each, then put the ball away."
+        ],
+        say: "In.",
+        builds: "Aim, letting go on purpose, two hands working together", need: "Laundry basket, soft ball or knotted socks", tags: "ball throw roll" },
+      { id: "m18-box", kind: "movement", icon: "box", name: "Push the box",
+        steps: [
+          "Put two or three books in a cardboard box so it has weight but still slides.",
+          "Set the box on the floor and a chair at the other side of the room.",
+          "Put both of their hands on the box and give one gentle push with them.",
+          "Walk beside them while they push the box all the way to the chair.",
+          "At the chair, lift the books out together so the job feels finished.",
+          "One trip is the whole game."
+        ],
+        say: "Push.",
+        builds: "Walking with a load, leg strength, finishing a task", need: "Cardboard box, a few books", tags: "push strength walk" },
+      { id: "m18-stairs", kind: "movement", icon: "stairs", name: "Hand-held stairs",
+        steps: [
+          "Stand at the bottom of a real staircase. They hold one of your fingers.",
+          "Go up only three steps. Pause on each step until both feet are on it.",
+          "On the third step, stop. Do not keep climbing.",
+          "To come down, you stand one step below them. They face the stairs.",
+          "If facing down is scary, they sit and scoot down one step at a time.",
+          "One up and one down, then leave the stairs."
+        ],
+        say: "Up. Down.",
+        builds: "Stair pattern, one-foot-then-the-other, trust while moving", need: "Stairs and your hand", tags: "stairs climb up down" },
+      { id: "m18-towel", kind: "movement", icon: "music", name: "Towel dance",
+        steps: [
+          "Give them one kitchen towel. You hold another, or the other end of theirs.",
+          "Put on one song. Wave your towel up high and wait for them to copy.",
+          "Wave it down low, then out to the side. One move at a time.",
+          "Hold both ends of one towel together and sway side to side.",
+          "Stop the music. Put your towel down and freeze for one second.",
+          "Start the music once more, then turn it off and end."
+        ],
+        say: "Stop.",
+        builds: "Arm control, copying, hearing a stop cue", need: "Kitchen towel, any song", tags: "dance music freeze scarf" },
+      { id: "b18-cups", kind: "brain", icon: "cup", name: "Two-cup hide",
+        steps: [
+          "Sit at a table or on the floor. Set two plastic cups upside down.",
+          "Show a toy that is bigger than a grape. Let them touch it.",
+          "While they are watching, cover the toy with one cup. Leave the other cup empty.",
+          "Ask where it is and wait. Let them lift a cup.",
+          "If they pick the empty one, lift the right cup, laugh, and show the toy.",
+          "Hide it again in plain sight. Do this three times. Do not shuffle the cups."
+        ],
+        say: "Where is it?",
+        builds: "Memory, object permanence, looking on purpose", need: "Two cups, one toy bigger than a grape", tags: "hide seek memory cups" },
+      { id: "b18-walk", kind: "brain", icon: "point", name: "Point-and-name walk",
+        steps: [
+          "Pick one room. Stay in that room.",
+          "Point at a door. Say only the one word, then wait.",
+          "If they point or make a sound, smile and say the word once more.",
+          "Do the same with a shoe, then a light or a cup.",
+          "Three objects is the whole game.",
+          "Tomorrow, use those same three words again."
+        ],
+        say: "Door. Shoe. Cup.",
+        builds: "Vocabulary, joint attention, pointing to share", need: "The room you are already in", tags: "words language talk point" },
+      { id: "b18-job", kind: "brain", icon: "check", name: "One job",
+        steps: [
+          "Put a laundry basket where they can see it.",
+          "Hand them exactly one sock.",
+          "Point at the basket and give one short instruction.",
+          "Walk with them if they need the reminder. Do not add a second job.",
+          "When the sock lands in the basket, name what happened.",
+          "Later in the week, try one new job: a book on the chair."
+        ],
+        say: "Sock in basket.",
+        builds: "Following one direction, helping, words tied to actions", need: "A sock and a basket", tags: "instructions listen help" },
+      { id: "b18-drum", kind: "brain", icon: "drum", name: "Stop-and-go drum",
+        steps: [
+          "Set a pot on the floor and give them a wooden spoon.",
+          "You take a spoon too and bang once so they join in.",
+          "After a few bangs, put your spoon down and hold up a flat hand.",
+          "Wait in the quiet. The pause is the skill.",
+          "Say go and bang again.",
+          "Do three stops, then take the spoon and put the pot away."
+        ],
+        say: "Stop. Go.",
+        builds: "Listening, stopping a fun action, cause and effect", need: "Pot and wooden spoon", tags: "music impulse stop go" },
+      { id: "b18-book", kind: "brain", icon: "book", name: "One-question book",
+        steps: [
+          "Sit with a picture book on your lap, not in front of a screen.",
+          "Open to a page with one clear thing, such as a dog or a ball.",
+          "Ask one question and point if they need help.",
+          "When they pat the picture, say its name once.",
+          "Turn one page and ask the same kind of question.",
+          "Close the book after two or three pages, while they still want more."
+        ],
+        say: "Where is the dog?",
+        builds: "Language, looking together, page turning", need: "Any picture book", tags: "read book words" }
+    ]
+  },
+  {
+    id: "a24",
+    label: "2–2.5 years",
+    span: "24–30 months",
+    aliases: ["2", "24", "two"],
+    ready: "Running, kicking, and short pretend scenes show up here. Many children use two-word phrases and can sort into two piles if you start the piles. Keep the choice to two options.",
+    week: "Repeat Tape river, Kick to the box, Two-pile sort, and Teddy’s day. Add Body-part point on a day they are chatty.",
+    games: [
+      { id: "m24-tape", kind: "movement", icon: "tape", name: "Tape river",
+        steps: [
+          "Stick two straight strips of painter’s tape on the floor, with a small gap between them.",
+          "Stand on one side and step across the gap yourself.",
+          "Call the gap a river. Invite them to step over it.",
+          "Hold a hand the first time if they hesitate.",
+          "When it feels easy, peel the strips up and stick them a little farther apart.",
+          "If they start chewing the tape, peel it all up and the game is over."
+        ],
+        say: "Over the river.",
+        builds: "Stepping over, judging distance, both-feet takeoff", need: "Painter’s tape", tags: "jump step balance" },
+      { id: "m24-animal", kind: "movement", icon: "animal", name: "Animal copies",
+        steps: [
+          "Clear a little floor space. You do the move first.",
+          "Bear: hands and feet on the floor, crawl four steps. They copy.",
+          "Stand up. Frog: squat, then a tiny hop. They copy.",
+          "Bird: arms out, walk slowly across the room. They copy.",
+          "Name the animal once before each move. Two animals is enough on a tired day.",
+          "Their copy can be messy. End while they are still joining in."
+        ],
+        say: "Bear. Frog. Bird.",
+        builds: "Whole-body control, imitation, animal words", need: "Floor space", tags: "crawl hop animal copy" },
+      { id: "m24-kick", kind: "movement", icon: "kick", name: "Kick to the box",
+        steps: [
+          "Lay a cardboard box on its side so the open end faces them.",
+          "Set a soft ball on the floor, still, two of their steps from the box.",
+          "You kick it in once so they see the idea.",
+          "Put the ball back. They kick. You fetch it.",
+          "Each time it goes in, touch one finger and say the next number, up to three.",
+          "After three goals, close the box and stop."
+        ],
+        say: "One. Two. Three.",
+        builds: "Kicking, aiming, early one-to-one counting", need: "Box, soft ball", tags: "kick ball soccer count" },
+      { id: "m24-deliver", kind: "movement", icon: "bear", name: "Delivery walk",
+        steps: [
+          "Hand them a stuffed animal they can carry in two arms.",
+          "Point to the bed, or a pillow if you have no bed nearby.",
+          "Walk with them. Do not carry the animal for them.",
+          "At the bed, they set the animal down.",
+          "Hand the animal back and point to the chair. They carry it there.",
+          "Two deliveries, then sit the animal down and end."
+        ],
+        say: "Take bear to the bed.",
+        builds: "Walking while carrying, remembering a place, completing an errand", need: "Stuffed animal", tags: "carry memory errand" },
+      { id: "m24-climb", kind: "movement", icon: "climb", name: "Spot-the-climb",
+        steps: [
+          "Stand at the side of the couch, close enough to catch a slip.",
+          "Let them climb up the way they usually do. Keep your hands ready, not lifting.",
+          "When they are up, they turn around to face you.",
+          "Say the words, then wait for feet to come down first.",
+          "Spot them on the way down. One climb up and one climb down.",
+          "If they want to jump off, you move them to a sit-and-slide instead."
+        ],
+        say: "Feet first.",
+        builds: "Climbing strength, coming down safely, body planning", need: "Couch and you beside it", tags: "climb couch down" },
+      { id: "b24-sort", kind: "brain", icon: "sort", name: "Two-pile sort",
+        steps: [
+          "Use four socks and four shirts, or four red things and four blue things.",
+          "Make two piles. Put one correct item in each pile and name it.",
+          "Hand them one item. Point at the matching pile.",
+          "They place the rest, one at a time.",
+          "If one lands in the wrong pile, move it and name the pile again.",
+          "When both piles are done, dump them back only if they ask to play again."
+        ],
+        say: "Socks. Shirts.",
+        builds: "Categories, looking for sameness, early sorting", need: "Laundry, or toys in two obvious colors", tags: "sort color laundry match" },
+      { id: "b24-words", kind: "brain", icon: "words", name: "Copy two words",
+        steps: [
+          "Use a real moment, such as water, a ball, or a shoe. Skip a lesson seat.",
+          "Hold the thing where they can see it.",
+          "Say a two-word phrase, then pause.",
+          "If they say one word, you say both words again and hand the thing over.",
+          "Do this once, then go back to the day.",
+          "Across the whole day, five phrases is plenty. Spread them out."
+        ],
+        say: "More water. Big ball.",
+        builds: "Two-word speech, asking for what they want", need: "Whatever they already want", tags: "talk language words speech" },
+      { id: "b24-teddy", kind: "brain", icon: "bear", name: "Teddy’s day",
+        steps: [
+          "Sit with a stuffed animal, a spoon, and a towel.",
+          "They hold the spoon to the animal’s mouth. You name that beat.",
+          "Lay the towel over the animal. Pat it once.",
+          "Lift the towel together and sit the animal up.",
+          "Do those three beats in the same order. Add nothing else today.",
+          "Tomorrow, play the same three beats and let them lead if they remember."
+        ],
+        say: "Eat. Sleep. Up.",
+        builds: "Pretend play, order of events, care words", need: "Stuffed animal, spoon, towel", tags: "pretend doll story" },
+      { id: "b24-body", kind: "brain", icon: "body", name: "Body-part point",
+        steps: [
+          "Sit facing each other.",
+          "Ask for their nose. If they hesitate, point to your own nose first.",
+          "Then ears, tummy, and feet. One part, then wait.",
+          "Switch: ask them to point to your nose.",
+          "Stop at four parts.",
+          "If they wander off, the game is done."
+        ],
+        say: "Where is your nose?",
+        builds: "Body words, pointing on request, you versus me", need: "Nothing", tags: "body nose ears language" },
+      { id: "b24-lids", kind: "brain", icon: "lid", name: "Lid match",
+        steps: [
+          "Set out three containers that look different: a jar, a food tub, a bottle.",
+          "Take all three lids off and mix them in a pile.",
+          "You hold the first container steady on the table.",
+          "They try lids until one fits. Let the wrong ones fail.",
+          "When it closes, say the word and set that one aside.",
+          "Do the other two the same way."
+        ],
+        say: "Fit.",
+        builds: "Trying solutions, size matching, hand strength", need: "Three different lidded containers", tags: "puzzle match fine motor hands" }
+    ]
+  },
+  {
+    id: "a30",
+    label: "2.5–3 years",
+    span: "30–36 months",
+    aliases: ["2.5", "30", "3", "36"],
+    ready: "Jumping forward, a short sentence, and two-step requests start to work. They can hold a color or a number in mind for a minute if the game stays physical and you play too.",
+    week: "Repeat Tape tightrope, Freeze dance, Color hunt, and Two-step errand. Use Count the snack at the real snack, not as a separate lesson.",
+    games: [
+      { id: "m30-line", kind: "movement", icon: "line", name: "Tape tightrope",
+        steps: [
+          "Stick one long strip of painter’s tape on the floor, about three big steps.",
+          "You walk your own imaginary line beside it, arms out.",
+          "They start at one end and walk along the tape with arms out.",
+          "If a foot steps off, they simply step back on. There is no score.",
+          "Walk to the end, turn, and come back once.",
+          "Peel the tape up when you are done, or if it goes toward a mouth."
+        ],
+        say: "On the line.",
+        builds: "Balance, looking ahead, staying with a path", need: "Painter’s tape", tags: "balance walk line" },
+      { id: "m30-jump", kind: "movement", icon: "jump", name: "Sock jump",
+        steps: [
+          "Lay one sock flat on the floor.",
+          "You stand in front of it and jump forward with both feet.",
+          "They stand at the sock. Bend knees a little, then jump over it.",
+          "Cheer the landing, not the height.",
+          "Lay a second sock a short gap away and jump that one too.",
+          "Three jumps, then a drink, then stop."
+        ],
+        say: "Jump.",
+        builds: "Two-foot jump, timing, courage at a tiny height", need: "Socks", tags: "jump socks" },
+      { id: "m30-target", kind: "movement", icon: "target", name: "Sock-ball target",
+        steps: [
+          "Roll two socks into balls big enough that they cannot fit in a mouth.",
+          "Set a laundry basket on the floor.",
+          "They stand one big step away.",
+          "Show an underhand throw. The sock ball goes into the basket.",
+          "They throw both balls. You hand them back.",
+          "After two throws that land in, take one step farther back. Then end."
+        ],
+        say: "In the basket.",
+        builds: "Throwing, aim, adjusting force", need: "Socks, laundry basket", tags: "throw ball aim socks" },
+      { id: "m30-freeze", kind: "movement", icon: "music", name: "Freeze dance",
+        steps: [
+          "Put on a song you can pause.",
+          "While the music plays, you both dance.",
+          "Pause the music. Freeze like a statue. You must freeze too.",
+          "Hold still for about two seconds.",
+          "Start the music and dance again.",
+          "Four freezes, then turn the song off."
+        ],
+        say: "Freeze.",
+        builds: "Stop and go, balance while still, hearing a signal", need: "Any song", tags: "dance music freeze listen" },
+      { id: "m30-obstacle", kind: "movement", icon: "walk", name: "Three-part obstacle",
+        steps: [
+          "Set the same course every time: table, then a pillow, then a chair, then the door.",
+          "Before they start, point and name the three places once.",
+          "You go first: crawl under the table, step over the pillow, walk around the chair, touch the door.",
+          "Come back to the start.",
+          "They do the course once. You walk beside them and only repeat a place if they skip it.",
+          "Touch the door together. That touch is the finish."
+        ],
+        say: "Table, pillow, door.",
+        builds: "Remembering a sequence, bending, stepping, turning", need: "Table, pillow, chair", tags: "obstacle course crawl sequence" },
+      { id: "b30-color", kind: "brain", icon: "color", name: "Color hunt",
+        steps: [
+          "Pick one color they already hear a lot, usually red or blue.",
+          "Lay a towel on the floor. That is the nest.",
+          "Walk the room together and find one thing of that color.",
+          "They carry it to the towel. Then find a second, then a third.",
+          "At the towel, touch each thing and count one, two, three.",
+          "Put all three things back where they came from."
+        ],
+        say: "Find red.",
+        builds: "Color words, searching, holding a rule in mind", need: "Objects already in the room", tags: "color red blue find" },
+      { id: "b30-story", kind: "brain", icon: "story", name: "Toy story of three",
+        steps: [
+          "Pick one toy and a box. Sit on the floor.",
+          "Move the toy through three actions: it drives, it stops, it sleeps in the box.",
+          "Tell that story once while you move the toy.",
+          "Set the toy back at the start and ask what happened first. Pointing counts.",
+          "Let them move the toy through the same three actions.",
+          "Tomorrow, tell the same story before you add anything new."
+        ],
+        say: "What happened first?",
+        builds: "Sequence, story, remembering order", need: "One toy and a box", tags: "story pretend memory" },
+      { id: "b30-count", kind: "brain", icon: "count", name: "Count the snack",
+        steps: [
+          "At the real snack, set out exactly three pieces in a row.",
+          "Touch the first piece and say one. Touch the second and say two. Touch the third and say three.",
+          "Slide the row toward them.",
+          "They touch each piece and say the number with you.",
+          "They eat the three pieces.",
+          "The game ends when the snack is gone. Do not start a second counting lesson."
+        ],
+        say: "One, two, three.",
+        builds: "Counting to three with real objects, one-to-one touch", need: "Three pieces of snack", tags: "count number math snack" },
+      { id: "b30-bag", kind: "brain", icon: "bag", name: "Mystery bag",
+        steps: [
+          "Choose three familiar things that are too big to swallow: a spoon, a ball, a sock. Nothing sharp.",
+          "Put only the spoon in a pillowcase.",
+          "They reach in without looking and feel it.",
+          "They guess. Then they pull it out to check.",
+          "Do the ball next, then the sock. One object at a time.",
+          "Show the empty pillowcase so they can see the game is finished."
+        ],
+        say: "What is it?",
+        builds: "Touch discrimination, naming, waiting to see", need: "Pillowcase and three safe objects", tags: "touch feel guess sensory" },
+      { id: "b30-errand", kind: "brain", icon: "errand", name: "Two-step errand",
+        steps: [
+          "Stay in the same room. Put a cup where they can see it, and an empty chair nearby.",
+          "Kneel so you are at their height.",
+          "Say the whole job in one sentence, then point at the cup and the chair.",
+          "Wait. Do not walk over and do it for them.",
+          "If they only get the cup, repeat the whole sentence once.",
+          "When the cup is on the chair, name both steps. One errand is enough."
+        ],
+        say: "Get the cup and put it on the chair.",
+        builds: "Working memory, two-step directions, helping at home", need: "A cup and a chair", tags: "instructions memory listen" }
+    ]
+  }
+];
+
+const GAMES = AGES.flatMap((age) => age.games.map((game) => ({
+  ...game,
+  ageId: age.id,
+  ageLabel: age.label,
+  span: age.span,
+  blob: [game.name, ...(game.steps || []), game.say || "", game.builds, game.need, game.tags, age.label, age.span, game.kind].join(" ").toLowerCase()
+})));
+
+const BG_AGES = {
+  a18: {
+    label: "1,5–2 години",
+    span: "18–24 месеца",
+    ready: "Повечето деца на тази възраст ходят, клякат и се качват на нисък диван. Думите са малко. Учат, като правят едно нещо наведнъж, а ти си до тях, повтаряш и назоваваш.",
+    week: "Повтаряй „Път от възглавници“, „Търкаляй в коша“, „Криеница с две чаши“ и „Една задача“. Същите четири игри цяла седмица. Познатото е по-лесно, а повторението е урокът."
+  },
+  a24: {
+    label: "2–2,5 години",
+    span: "24–30 месеца",
+    ready: "Тук се появяват тичане, ритане и кратки игри на уж. Много деца казват по две думи и могат да сортират в две купчини, ако ти започнеш купчините. Изборът да е от две неща.",
+    week: "Повтаряй „Река от тиксо“, „Ритни в кутията“, „Две купчини“ и „Денят на мечето“. В приказлив ден добави „Покажи частта от тялото“."
+  },
+  a30: {
+    label: "2,5–3 години",
+    span: "30–36 месеца",
+    ready: "Скок напред, кратко изречение и молба от две стъпки започват да се получават. Могат да задържат цвят или число за минута, ако играта е с тяло и ти също играеш.",
+    week: "Повтаряй „Въже от тиксо“, „Замръзни в танца“, „Лов на цвят“ и „Поръчка от две стъпки“. „Брой закуската“ е на истинската закуска, не отделен урок."
+  }
+};
+
+const BG_GAMES = {
+  "m18-cushion": {
+    name: "Път от възглавници",
+    steps: [
+      "Свали три възглавници от дивана на пода, така че да се допират в права линия.",
+      "Застани в единия край и потупай първата възглавница, за да се види откъде се започва.",
+      "Дръж една ръка. Нека пропълзи или стъпи върху първата възглавница.",
+      "Върви отстрани през трите. Всеки път, когато стъпи, кажи думата веднъж.",
+      "В другия край обърни посоката и се върнете по същия път.",
+      "Спри след два пъти. Плесни веднъж, за да има ясен край."
+    ],
+    say: "Отгоре.",
+    builds: "Равновесие, катерене, усещане къде е тялото",
+    need: "Възглавници от дивана",
+    tags: "ходене пълзене катерене възглавница баланс"
+  },
+  "m18-basket": {
+    name: "Търкаляй в коша",
+    steps: [
+      "Седни на пода. Сложи коша за пране на около една ръка разстояние.",
+      "Вземи мека топка или завържи два чорапа, за да стане голяма топка.",
+      "Търкулни топката бавно веднъж, така че да спре в коша.",
+      "Подай топката така, че и двете ръце да са върху нея. Посочи коша.",
+      "Ако не уцели, приближи коша. Без точки.",
+      "По три пъти всеки, после прибери топката."
+    ],
+    say: "Вътре.",
+    builds: "Прицелване, пускане нарочно, две ръце заедно",
+    need: "Кош за пране, мека топка или вързани чорапи",
+    tags: "топка хвърляне търкаляне чорапи кош"
+  },
+  "m18-box": {
+    name: "Бутни кутията",
+    steps: [
+      "Сложи две или три книги в картонена кутия, за да тежи, но пак да се плъзга.",
+      "Остави кутията на пода, а стола в другия край на стаята.",
+      "Сложи двете ръце върху кутията и бутнете леко заедно веднъж.",
+      "Върви отстрани, докато кутията стигне до стола.",
+      "При стола извадете книгите заедно, за да се усети, че работата е свършена.",
+      "Един път е цялата игра."
+    ],
+    say: "Бутни.",
+    builds: "Ходене с товар, сила в краката, довършване на задача",
+    need: "Картонена кутия и няколко книги",
+    tags: "бутане сила ходене кутия книги"
+  },
+  "m18-stairs": {
+    name: "Стълби за ръка",
+    steps: [
+      "Застанете в подножието на истинско стълбище. Един пръст е в детската ръка.",
+      "Качете се само три стъпала. Спри на всяко, докато и двата крака са върху него.",
+      "На третото стъпало спри. Не продължавайте нагоре.",
+      "За слизане застани едно стъпало по-надолу. Лицето е към стъпалата.",
+      "Ако с лицето надолу е страшно, сядане и спускане по едно стъпало.",
+      "Веднъж нагоре и веднъж надолу, после напуснете стълбите."
+    ],
+    say: "Горе. Долу.",
+    builds: "Стъпало по стъпало, крак след крак, доверие в движението",
+    need: "Стълби и твоята ръка",
+    tags: "стълби катерене горе долу"
+  },
+  "m18-towel": {
+    name: "Танц с кърпа",
+    steps: [
+      "Дай една кухненска кърпа. Ти дръж друга или другия край на същата.",
+      "Пусни една песен. Размахай кърпата високо и изчакай да те последва.",
+      "После ниско, после встрани. По едно движение.",
+      "Хванете двата края на една кърпа и се полюлейте наляво и надясно.",
+      "Спри музиката. Свали кърпата и замри за една секунда.",
+      "Пусни музиката още веднъж, после я изключи и край."
+    ],
+    say: "Спри.",
+    builds: "Контрол на ръцете, повторение, чуване на сигнал за спиране",
+    need: "Кухненска кърпа и някоя песен",
+    tags: "танц музика замръзни кърпа"
+  },
+  "b18-cups": {
+    name: "Криеница с две чаши",
+    steps: [
+      "Седнете на маса или на пода. Обърни две пластмасови чаши с дъното нагоре.",
+      "Покажи играчка, по-голяма от гроздово зърно. Нека я пипне.",
+      "Докато гледа, покрий играчката с едната чаша. Другата остава празна.",
+      "Попитай къде е и изчакай. Нека вдигне чаша.",
+      "Ако вдигне празната, вдигни вярната, засмейте се и покажи играчката.",
+      "Скрий я пак на видно място. Три пъти. Без да разместваш чашите."
+    ],
+    say: "Къде е?",
+    builds: "Памет, търсене на скрито нещо, гледане нарочно",
+    need: "Две чаши и една играчка, по-голяма от грозде",
+    tags: "криеница памет чаши играчка"
+  },
+  "b18-walk": {
+    name: "Разходка с посочване",
+    steps: [
+      "Избери една стая. Останете в нея.",
+      "Посочи врата. Кажи само едната дума и изчакай.",
+      "Ако посочи или издаде звук, усмихни се и повтори думата веднъж.",
+      "Същото с обувка, после с лампа или чаша.",
+      "Три предмета са цялата игра.",
+      "Утре използвай същите три думи."
+    ],
+    say: "Врата. Обувка. Чаша.",
+    builds: "Думи, общо внимание, посочване за споделяне",
+    need: "Стаята, в която вече сте",
+    tags: "думи език говорене посочване"
+  },
+  "b18-job": {
+    name: "Една задача",
+    steps: [
+      "Сложи коша за пране на видно място.",
+      "Дай точно един чорап.",
+      "Посочи коша и дай една кратка инструкция.",
+      "Вървете заедно, ако трябва напомняне. Без втора задача.",
+      "Когато чорапът падне в коша, кажи какво стана.",
+      "По-късно през седмицата една нова задача: книга върху стола."
+    ],
+    say: "Чорап в коша.",
+    builds: "Една инструкция, помагане, думи вързани с действие",
+    need: "Чорап и кош",
+    tags: "инструкции слушане помощ чорап"
+  },
+  "b18-drum": {
+    name: "Барабан спри-тръгни",
+    steps: [
+      "Сложи тенджера на пода и дай дървена лъжица.",
+      "Вземи и ти лъжица и удари веднъж, за да се включи.",
+      "След няколко удара остави лъжицата и вдигни отворена длан.",
+      "Изчакай в тишината. Паузата е умението.",
+      "Кажи думата за тръгване и ударете пак.",
+      "Три спирания, после вземи лъжицата и прибери тенджерата."
+    ],
+    say: "Спри. Тръгвай.",
+    builds: "Слушане, спиране на забавно действие, причина и следствие",
+    need: "Тенджера и дървена лъжица",
+    tags: "музика спиране тръгване барабан"
+  },
+  "b18-book": {
+    name: "Книга с един въпрос",
+    steps: [
+      "Седни с книжка с картинки в скута, без екран.",
+      "Отвори на страница с едно ясно нещо, например куче или топка.",
+      "Задай един въпрос и посочи, ако трябва помощ.",
+      "Когато потупа картинката, кажи името веднъж.",
+      "Обърни една страница и задай същия вид въпрос.",
+      "Затвори книгата след две или три страници, докато още има желание за още."
+    ],
+    say: "Къде е кучето?",
+    builds: "Език, гледане заедно, обръщане на страници",
+    need: "Книжка с картинки",
+    tags: "четене книга думи"
+  },
+  "m24-tape": {
+    name: "Река от тиксо",
+    steps: [
+      "Залепи две прави ленти хартиено тиксо на пода с малка междина.",
+      "Застани от едната страна и прескочи междината ти.",
+      "Наречи междината река. Покани детето да я прескочи.",
+      "Първия път дръж ръка, ако има колебание.",
+      "Когато стане лесно, отлепи лентите и ги залепи малко по-надалеч.",
+      "Ако тиксото тръгне към устата, отлепи го и играта свършва."
+    ],
+    say: "През реката.",
+    builds: "Прекрачване, преценка на разстояние, отскок с два крака",
+    need: "Хартиено тиксо",
+    tags: "скок стъпка баланс тиксо"
+  },
+  "m24-animal": {
+    name: "Животни за повтаряне",
+    steps: [
+      "Освободи малко място на пода. Ти правиш движението първи.",
+      "Мечка: ръце и крака на пода, пропълзи четири крачки. Детето повтаря.",
+      "Изправи се. Жаба: клек, после мъничък скок. Детето повтаря.",
+      "Птица: ръце встрани, бавно минаване през стаята. Детето повтаря.",
+      "Кажи животното веднъж преди движението. В уморен ден две животни стигат.",
+      "Повторението може да е разхвърляно. Спри, докато още има участие."
+    ],
+    say: "Мечка. Жаба. Птица.",
+    builds: "Контрол на цялото тяло, подражание, думи за животни",
+    need: "Място на пода",
+    tags: "пълзене скок животно мечка жаба птица"
+  },
+  "m24-kick": {
+    name: "Ритни в кутията",
+    steps: [
+      "Постави картонена кутия настрани, с отвора към детето.",
+      "Сложи мека топка на пода, неподвижна, на две детски крачки от кутията.",
+      "Ритни я вътре веднъж, за да се види идеята.",
+      "Върни топката. Детето рита. Ти я донасяш.",
+      "Всеки път, когато влезе, докосни един пръст и кажи следващото число до три.",
+      "След три гола затвори кутията и спри."
+    ],
+    say: "Едно. Две. Три.",
+    builds: "Ритане, прицел, броене едно по едно",
+    need: "Кутия и мека топка",
+    tags: "ритане топка футбол броене"
+  },
+  "m24-deliver": {
+    name: "Доставка пеша",
+    steps: [
+      "Дай плюшена играчка, която се носи с две ръце.",
+      "Посочи леглото или възглавница, ако леглото е далеч.",
+      "Вървете заедно. Не носи играчката вместо детето.",
+      "При леглото играчката се оставя там.",
+      "Върни я в ръцете и посочи стола. Носи се дотам.",
+      "Две доставки, после седнете играчката и край."
+    ],
+    say: "Занеси мечето в леглото.",
+    builds: "Ходене с носене, запомняне на място, довършена поръчка",
+    need: "Плюшена играчка",
+    tags: "носене памет поръчка мече"
+  },
+  "m24-climb": {
+    name: "Катерене с охрана",
+    steps: [
+      "Застани до дивана, достатъчно близо да хванеш при подхлъзване.",
+      "Качването е по обичайния начин. Ръцете са готови, без вдигане.",
+      "Когато е горе, обръщане с лице към теб.",
+      "Кажи думите и изчакай краката да слязат първи.",
+      "Охранявай слизането. Веднъж нагоре и веднъж надолу.",
+      "Ако има желание за скок надолу, премини към сядане и свличане."
+    ],
+    say: "Първо краката.",
+    builds: "Сила за катерене, безопасно слизане, план за тялото",
+    need: "Диван и ти до него",
+    tags: "катерене диван долу"
+  },
+  "b24-sort": {
+    name: "Две купчини",
+    steps: [
+      "Четири чорапа и четири тениски, или четири червени и четири сини неща.",
+      "Направи две купчини. Във всяка сложи по едно вярно нещо и го назови.",
+      "Подай едно нещо. Посочи същата купчина.",
+      "Останалите се слагат по едно.",
+      "Ако попадне в грешната, премести го и пак назови купчината.",
+      "Когато и двете са готови, разбъркай ги само ако поискат пак."
+    ],
+    say: "Чорапи. Тениски.",
+    builds: "Категории, еднаквост, ранно сортиране",
+    need: "Пране или играчки в два ясни цвята",
+    tags: "сортиране цвят пране чорапи"
+  },
+  "b24-words": {
+    name: "Две думи за повтаряне",
+    steps: [
+      "Използвай истински момент: вода, топка или обувка. Без сядане на урок.",
+      "Дръж нещото така, че да се вижда.",
+      "Кажи фраза от две думи и направи пауза.",
+      "Ако се каже една дума, повтори двете и подай нещото.",
+      "Веднъж, после се върни към деня.",
+      "За целия ден пет фрази стигат. Разпръсни ги."
+    ],
+    say: "Още вода. Голяма топка.",
+    builds: "Реч от две думи, искане на нужното",
+    need: "Онова, което вече се иска",
+    tags: "говорене език думи реч"
+  },
+  "b24-teddy": {
+    name: "Денят на мечето",
+    steps: [
+      "Седнете с плюшена играчка, лъжица и кърпа.",
+      "Лъжицата отива към устата на играчката. Назови този момент.",
+      "Покрий играчката с кърпата. Потупай веднъж.",
+      "Вдигнете кърпата заедно и изправете играчката.",
+      "Трите момента в същия ред. Днес без нищо ново.",
+      "Утре същите три момента. Ако ги помни, нека води."
+    ],
+    say: "Яде. Спи. Стани.",
+    builds: "Игра на уж, ред на събитията, думи за грижа",
+    need: "Плюшена играчка, лъжица, кърпа",
+    tags: "уж кукла история мече"
+  },
+  "b24-body": {
+    name: "Покажи частта от тялото",
+    steps: [
+      "Седнете един срещу друг.",
+      "Попитай за носа. Ако има колебание, първо посочи своя нос.",
+      "После уши, коремче и крака. Една част, после изчакай.",
+      "Обърни въпроса: къде е твоят нос? Нека посочи към теб.",
+      "Спри на четири части.",
+      "Ако вниманието се отнесе, играта е приключила."
+    ],
+    say: "Къде е носът?",
+    builds: "Думи за тялото, посочване по молба, аз и ти",
+    need: "Нищо",
+    tags: "тяло нос уши език"
+  },
+  "b24-lids": {
+    name: "Капачето пасва",
+    steps: [
+      "Три различни съда: буркан, кутия от храна, бутилка.",
+      "Махни трите капачета и ги разбъркай на купчина.",
+      "Дръж първия съд стабилно на масата.",
+      "Пробват се капачета, докато едно пасне. Грешните нека не стават.",
+      "Когато се затвори, кажи думата и го отмести.",
+      "Същото с другите два."
+    ],
+    say: "Пасва.",
+    builds: "Опити, съвпадане по размер, сила в ръката",
+    need: "Три различни съда с капачета",
+    tags: "пъзел капаче ръце буркан"
+  },
+  "m30-line": {
+    name: "Въже от тиксо",
+    steps: [
+      "Залепи една дълга лента хартиено тиксо на пода, около три големи крачки.",
+      "Ти вървиш по своя въображаема линия до нея, с ръце встрани.",
+      "Стартът е от единия край, по тиксото, с ръце встрани.",
+      "Ако крак излезе, просто се връща върху лентата. Без точки.",
+      "До края, обръщане и връщане веднъж.",
+      "Отлепи тиксото накрая или ако тръгне към устата."
+    ],
+    say: "По линията.",
+    builds: "Равновесие, гледане напред, оставане на пътеката",
+    need: "Хартиено тиксо",
+    tags: "баланс ходене линия тиксо"
+  },
+  "m30-jump": {
+    name: "Скок през чорап",
+    steps: [
+      "Постави един чорап плоско на пода.",
+      "Застани пред него и скочи напред с двата крака.",
+      "Детето застава при чорапа. Леко свива колене и скача през него.",
+      "Похвали приземяването, не височината.",
+      "Сложи втори чорап малко по-нататък и скочете и през него.",
+      "Три скока, после вода, после край."
+    ],
+    say: "Скок.",
+    builds: "Скок с два крака, усещане за момент, смелост на мъничка височина",
+    need: "Чорапи",
+    tags: "скок чорапи"
+  },
+  "m30-target": {
+    name: "Мишена с чорап",
+    steps: [
+      "Навий два чорапа на топки, твърде големи, за да влязат в устата.",
+      "Сложи коша за пране на пода.",
+      "Мястото за хвърляне е на една голяма крачка от коша.",
+      "Покажи хвърляне отдолу. Чорапената топка влиза в коша.",
+      "Хвърлят се и двете. Ти ги връщаш.",
+      "След две попадения отстъпи една крачка назад. После край."
+    ],
+    say: "В коша.",
+    builds: "Хвърляне, прицел, сила на хвърлянето",
+    need: "Чорапи и кош за пране",
+    tags: "хвърляне топка прицел чорапи кош"
+  },
+  "m30-freeze": {
+    name: "Замръзни в танца",
+    steps: [
+      "Пусни песен, която можеш да спреш.",
+      "Докато свири, танцувате и двамата.",
+      "Спри музиката. Замръзнете като статуи. Ти също замръзваш.",
+      "Стойте неподвижно около две секунди.",
+      "Пусни музиката и танцувайте пак.",
+      "Четири замръзвания, после изключи песента."
+    ],
+    say: "Замръзни.",
+    builds: "Спри и тръгни, равновесие в покой, чуване на сигнал",
+    need: "Някоя песен",
+    tags: "танц музика замръзни слушане"
+  },
+  "m30-obstacle": {
+    name: "Пътека от три части",
+    steps: [
+      "Винаги същият ред: маса, после възглавница, после стол, после врата.",
+      "Преди старта посочи и назови трите места веднъж.",
+      "Ти минаваш първи: пропълзи под масата, прекрачи възглавницата, заобиколи стола, докосни вратата.",
+      "Върни се в началото.",
+      "Детето минава веднъж. Вървиш до него и повтаряш място само ако е пропуснато.",
+      "Докоснете вратата заедно. Това е финалът."
+    ],
+    say: "Маса, възглавница, врата.",
+    builds: "Запомняне на ред, навеждане, прекрачване, завиване",
+    need: "Маса, възглавница, стол",
+    tags: "препятствие пътека пълзене ред"
+  },
+  "b30-color": {
+    name: "Лов на цвят",
+    steps: [
+      "Избери един цвят, който вече се чува често, обикновено червено или синьо.",
+      "Постели кърпа на пода. Това е гнездото.",
+      "Обиколете стаята и намерете едно нещо в този цвят.",
+      "Носи се до кърпата. После второ, после трето.",
+      "При кърпата докосни всяко и преброй: едно, две, три.",
+      "Върни и трите неща по местата им."
+    ],
+    say: "Намери червено.",
+    builds: "Думи за цвят, търсене, задържане на правило",
+    need: "Неща, които вече са в стаята",
+    tags: "цвят червено синьо намери"
+  },
+  "b30-story": {
+    name: "История от три действия",
+    steps: [
+      "Една играчка и една кутия. Седнете на пода.",
+      "Три действия: кара, спира, спи в кутията.",
+      "Разкажи историята веднъж, докато движиш играчката.",
+      "Върни я в началото и попитай кое беше първо. Посочването се брои.",
+      "Нека детето прекара играчката през същите три действия.",
+      "Утре същата история, преди да добавиш нещо ново."
+    ],
+    say: "Кое беше първо?",
+    builds: "Ред, история, запомняне на последователност",
+    need: "Една играчка и кутия",
+    tags: "история уж памет играчка"
+  },
+  "b30-count": {
+    name: "Брой закуската",
+    steps: [
+      "На истинската закуска сложи точно три парчета в редица.",
+      "Докосни първото и кажи едно. Второто е две. Третото е три.",
+      "Плъзни редицата към детето.",
+      "Всяко парче се докосва и числото се казва заедно.",
+      "Трите парчета се изяждат.",
+      "Играта свършва, когато закуската свърши. Без втори урок по броене."
+    ],
+    say: "Едно, две, три.",
+    builds: "Броене до три с истински неща, докосване едно по едно",
+    need: "Три парчета закуска",
+    tags: "броене число закуска"
+  },
+  "b30-bag": {
+    name: "Тайнствена торба",
+    steps: [
+      "Три познати неща, твърде големи за гълтане: лъжица, топка, чорап. Нищо остро.",
+      "Сложи само лъжицата в калъфка.",
+      "Бърка се вътре без гледане и се пипа.",
+      "Познава се. После се изважда, за да проверите.",
+      "После топката, после чорапът. По едно нещо.",
+      "Покажи празната калъфка, за да се види, че играта е свършила."
+    ],
+    say: "Какво е това?",
+    builds: "Разпознаване с пипане, назоваване, изчакване да се види",
+    need: "Калъфка и три безопасни предмета",
+    tags: "пипане познай чорап лъжица"
+  },
+  "b30-errand": {
+    name: "Поръчка от две стъпки",
+    steps: [
+      "Останете в същата стая. Чашата се вижда, наблизо има празен стол.",
+      "Клекни на детската височина.",
+      "Кажи цялата задача в едно изречение, после посочи чашата и стола.",
+      "Изчакай. Не отивай да я свършиш вместо детето.",
+      "Ако се вземе само чашата, повтори цялото изречение веднъж.",
+      "Когато чашата е на стола, назови и двете стъпки. Една поръчка стига."
+    ],
+    say: "Вземи чашата и я сложи на стола.",
+    builds: "Работна памет, инструкции от две стъпки, помагане у дома",
+    need: "Чаша и стол",
+    tags: "инструкции памет слушане чаша"
+  }
+};
+
+const UI = {
+  en: {
+    title: "Play plan, 1.5 to 3 years",
+    lede: "Thirty short games. Nothing to buy. Search by skill, object, or age.",
+    search: "Search games",
+    placeholder: "Search balance, socks, language, stairs…",
+    clear: "Clear",
+    age: "Age",
+    kind: "Kind",
+    movement: "Movement",
+    brain: "Brain",
+    tried: "Tried",
+    inSection: "In this section",
+    jump: "Jump to",
+    openSteps: "Tap to open the steps",
+    expandAll: "Open all",
+    collapseAll: "Close all",
+    toTop: "Top",
+    say: "Say",
+    syntax: "Also works in the box: <code>age:2.5</code> <code>kind:brain</code> <code>need:socks</code>. Press / to focus search.",
+    empty: "No games match that search. Try a skill like balance, a thing you have like socks, or an age like <code>age:2</code>.",
+    noteTitle: "Stay close",
+    note: "Hold a hand on stairs and stay beside the couch for climbs. Balls, sock-balls, and toys must be too big to fit in the mouth. Skip marbles, coins, beads, and bottle caps. If they peel painter’s tape, the game is over for the day. Children learn these skills on different clocks; if walking or words feel far behind other children the same age, ask the pediatrician.",
+    kit: "Household kit: cushions, laundry basket, painter’s tape, kitchen towel, socks, a soft ball, a cardboard box, a pot and wooden spoon, two cups, a picture book, a stuffed animal, three lidded containers.",
+    one: "game",
+    many: "games",
+    ages: { a18: "1.5–2", a24: "2–2.5", a30: "2.5–3" }
+  },
+  bg: {
+    title: "План за игри, 1,5 до 3 години",
+    lede: "Тридесет кратки игри. Нищо не се купува. Търси по умение, предмет или възраст.",
+    search: "Търси игри",
+    placeholder: "Търси баланс, чорапи, език, стълби…",
+    clear: "Изчисти",
+    age: "Възраст",
+    kind: "Вид",
+    movement: "Движение",
+    brain: "Мислене",
+    tried: "Пробвахме",
+    inSection: "В този раздел",
+    jump: "Към раздел",
+    openSteps: "Натисни за стъпките",
+    expandAll: "Отвори всички",
+    collapseAll: "Затвори всички",
+    toTop: "Нагоре",
+    say: "Кажи",
+    syntax: "В търсенето работи и: <code>възраст:2.5</code> <code>вид:движение</code> <code>трябва:чорапи</code>. Клавиш / отваря търсенето.",
+    empty: "Няма игри за това търсене. Опитай умение като баланс, нещо у дома като чорапи, или възраст като <code>възраст:2</code>.",
+    noteTitle: "Близо до детето",
+    note: "Дръж ръка на стълбите и стой до дивана при катерене. Топките, топките от чорапи и играчките трябва да са твърде големи, за да влязат в устата. Без мъниста, монети и капачки. Ако хартиеното тиксо тръгне към устата, играта свършва за деня. Децата усвояват тези неща по различно време. Ако ходенето или думите изостават спрямо връстниците, питай педиатъра.",
+    kit: "У дома: възглавници от дивана, кош за пране, хартиено тиксо, кухненска кърпа, чорапи, мека топка, картонена кутия, тенджера и дървена лъжица, две чаши, книжка с картинки, плюшена играчка, три кутии с капачета.",
+    one: "игра",
+    many: "игри",
+    ages: { a18: "1,5–2", a24: "2–2,5", a30: "2,5–3" }
+  }
+};
+
+for (const game of GAMES) {
+  const bgGame = BG_GAMES[game.id];
+  const bgAge = BG_AGES[game.ageId];
+  game.blob += " " + [bgGame.name, ...bgGame.steps, bgGame.say, bgGame.builds, bgGame.need, bgGame.tags, bgAge.label, bgAge.span].join(" ").toLowerCase();
+  game.needBlob = (game.need + " " + game.tags + " " + bgGame.need + " " + bgGame.tags).toLowerCase();
+}
+
+let lang = "en";
+
+const input = document.getElementById("q");
+const results = document.getElementById("results");
+const status = document.getElementById("status");
+const ageButtons = [...document.querySelectorAll("[data-age]")];
+const kindButtons = [...document.querySelectorAll("[data-kind]")];
+const TRIED_KEY = "play-plan-tried";
+
+function loadTried() {
+  try { return JSON.parse(localStorage.getItem(TRIED_KEY) || "{}"); }
+  catch { return {}; }
+}
+let tried = loadTried();
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+function highlight(text, terms) {
+  if (!terms.length) return escapeHtml(text);
+  const re = new RegExp(terms.map(escapeRegExp).join("|"), "gi");
+  let out = "";
+  let last = 0;
+  for (const match of text.matchAll(re)) {
+    const index = match.index ?? 0;
+    out += escapeHtml(text.slice(last, index));
+    out += "<mark>" + escapeHtml(match[0]) + "</mark>";
+    last = index + match[0].length;
+  }
+  return out + escapeHtml(text.slice(last));
+}
+
+function ageFromToken(token) {
+  const value = token.toLowerCase().replace(",", ".");
+  if (value === "1.5" || value === "18" || value === "a18") return "a18";
+  if (value === "2" || value === "24" || value === "a24") return "a24";
+  if (value === "2.5" || value === "3" || value === "30" || value === "36" || value === "a30") return "a30";
+  return null;
+}
+
+function parseQuery(raw) {
+  const ages = new Set();
+  const kinds = new Set();
+  const terms = [];
+  const needTerms = [];
+  for (const part of raw.trim().split(/\s+/).filter(Boolean)) {
+    const split = part.split(":");
+    if (split.length === 2) {
+      const key = split[0].toLowerCase();
+      const value = split[1].toLowerCase();
+      if (key === "age" || key === "възраст") {
+        const age = ageFromToken(value);
+        if (age) ages.add(age);
+        continue;
+      }
+      if (key === "kind" || key === "type" || key === "вид") {
+        if (value.startsWith("move") || value === "body" || value.startsWith("движ")) kinds.add("movement");
+        else if (value.startsWith("brain") || value === "think" || value === "mind" || value.startsWith("моз") || value.startsWith("мисл")) kinds.add("brain");
+        continue;
+      }
+      if (key === "need" || key === "with" || key === "трябва") {
+        if (value) needTerms.push(value);
+        continue;
+      }
+    }
+    terms.push(part.toLowerCase());
+  }
+  return { ages, kinds, terms, needTerms };
+}
+
+function readState() {
+  const params = new URLSearchParams(location.search);
+  const ages = new Set((params.get("age") || "").split(",").filter((id) => AGES.some((age) => age.id === id)));
+  const kinds = new Set((params.get("kind") || "").split(",").filter((id) => id === "movement" || id === "brain"));
+  const fromUrl = params.get("lang");
+  const stored = localStorage.getItem("play-plan-lang");
+  const lang = fromUrl === "bg" || fromUrl === "en" ? fromUrl : (stored === "bg" ? "bg" : "en");
+  return { q: params.get("q") || "", ages, kinds, lang };
+}
+
+function writeState(q, ages, kinds) {
+  const params = new URLSearchParams();
+  if (q.trim()) params.set("q", q.trim());
+  if (ages.size) params.set("age", [...ages].join(","));
+  if (kinds.size) params.set("kind", [...kinds].join(","));
+  if (lang === "bg") params.set("lang", "bg");
+  const next = params.toString();
+  const url = next ? "?" + next : location.pathname;
+  history.replaceState(null, "", url);
+}
+
+function selectedFromButtons(buttons, attr) {
+  return new Set(buttons.filter((button) => button.getAttribute("aria-pressed") === "true").map((button) => button.dataset[attr]));
+}
+
+function syncButtons(ages, kinds) {
+  for (const button of ageButtons) button.setAttribute("aria-pressed", ages.has(button.dataset.age) ? "true" : "false");
+  for (const button of kindButtons) button.setAttribute("aria-pressed", kinds.has(button.dataset.kind) ? "true" : "false");
+}
+
+function gameMatches(game, parsed, ages, kinds) {
+  const ageOk = (!ages.size || ages.has(game.ageId)) && (!parsed.ages.size || parsed.ages.has(game.ageId));
+  const kindOk = (!kinds.size || kinds.has(game.kind)) && (!parsed.kinds.size || parsed.kinds.has(game.kind));
+  if (!ageOk || !kindOk) return false;
+  if (parsed.needTerms.some((term) => !game.needBlob.includes(term))) return false;
+  return parsed.terms.every((term) => game.blob.includes(term));
+}
+
+function render() {
+  const q = input.value;
+  const ages = selectedFromButtons(ageButtons, "age");
+  const kinds = selectedFromButtons(kindButtons, "kind");
+  const parsed = parseQuery(q);
+  writeState(q, ages, kinds);
+
+  const hits = GAMES.filter((game) => gameMatches(game, parsed, ages, kinds));
+  const terms = [...parsed.terms, ...parsed.needTerms];
+  const showIntro = !q.trim() && ages.size <= 1 && !kinds.size && !parsed.ages.size && !parsed.kinds.size && !parsed.needTerms.length;
+
+  if (!hits.length) {
+    document.getElementById("section-nav").innerHTML = "";
+    results.innerHTML = `<div class="empty"><p>${UI[lang].empty}</p></div>`;
+    status.textContent = "0 " + UI[lang].many;
+    return;
+  }
+
+  const copy = UI[lang];
+  const groups = AGES
+    .map((age) => ({ age: viewAge(age), games: hits.filter((game) => game.ageId === age.id) }))
+    .filter((group) => group.games.length);
+
+  document.getElementById("section-nav").innerHTML =
+    `<span class="jump-label">${escapeHtml(copy.jump)}</span>` +
+    groups.map((group) =>
+      `<a href="#section-${group.age.id}" data-section="${group.age.id}">${escapeHtml(group.age.label)}</a>`
+    ).join("");
+
+  results.innerHTML = groups.map((group) => {
+    const intro = showIntro
+      ? `<p class="ready">${escapeHtml(group.age.ready)}</p><p class="week">${escapeHtml(group.age.week)}</p>`
+      : "";
+    const named = group.games.map((game) => ({ game, text: viewGame(game) }));
+    const tocLinks = (kind) => named
+      .filter((item) => item.game.kind === kind)
+      .map((item) => `<a class="toc-link ${kind}" href="#${item.game.id}">${highlight(item.text.name, terms)}</a>`)
+      .join("");
+    const cards = named.map(({ game, text }) => {
+      const kindLabel = game.kind === "movement" ? copy.movement : copy.brain;
+      const checked = tried[game.id] ? "checked" : "";
+      const steps = (text.steps || []).map((step, index) =>
+        `<li><span class="num">${index + 1}</span><span>${highlight(step, terms)}</span></li>`
+      ).join("");
+      const say = text.say ? `<p class="say"><b>${copy.say}</b> ${highlight(text.say, terms)}</p>` : "";
+      return `<div class="game-card" id="${game.id}">
+        <label class="tried"><input type="checkbox" data-tried="${game.id}" ${checked} /> ${copy.tried}</label>
+        <details class="game">
+          <summary>
+            <div class="sum">
+              <img class="scene" src="play-images/${game.id}.jpg" alt="" width="640" height="480" />
+              <div>
+                <h3>${highlight(text.name, terms)}</h3>
+                <div class="meta">
+                  <span class="tag ${game.kind}">${kindLabel}</span>
+                  <span class="tag">${escapeHtml(group.age.label)}</span>
+                </div>
+                <p class="open-hint">${escapeHtml(copy.openSteps)}</p>
+              </div>
+              <span class="chev" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+            </div>
+          </summary>
+          <div class="game-body">
+            <ol class="steps">${steps}</ol>
+            ${say}
+            <div class="facts">
+              <div class="fact">${ICONS.sprout}<span>${highlight(text.builds, terms)}</span></div>
+              <div class="fact">${ICONS.home}<span>${highlight(text.need, terms)}</span></div>
+            </div>
+          </div>
+        </details>
+      </div>`;
+    }).join("");
+    return `<section class="band" id="section-${group.age.id}" data-section="${group.age.id}">
+      <div class="band-head">
+        <div>
+          <div class="band-title">${ICONS[{ a18: "walk", a24: "animal", a30: "jump" }[group.age.id]]}<h2>${escapeHtml(group.age.label)}</h2></div>
+          <p class="span">${escapeHtml(group.age.span)}</p>
+        </div>
+        <div class="band-actions">
+          <button type="button" data-expand="${group.age.id}">${escapeHtml(copy.expandAll)}</button>
+          <button type="button" data-collapse="${group.age.id}">${escapeHtml(copy.collapseAll)}</button>
+        </div>
+      </div>
+      ${intro}
+      <nav class="toc" aria-label="${escapeHtml(copy.inSection)}">
+        <div><h3>${copy.movement}</h3>${tocLinks("movement")}</div>
+        <div><h3>${copy.brain}</h3>${tocLinks("brain")}</div>
+      </nav>
+      <div class="grid">${cards}</div>
+    </section>`;
+  }).join("");
+
+  status.textContent = hits.length + " " + (hits.length === 1 ? copy.one : copy.many);
+  watchSections();
+  document.getElementById("to-top").textContent = copy.toTop;
+}
+
+function viewAge(age) {
+  if (lang !== "bg") return age;
+  return { ...age, ...BG_AGES[age.id] };
+}
+
+function viewGame(game) {
+  if (lang !== "bg") return game;
+  return { ...game, ...BG_GAMES[game.id] };
+}
+
+function applyChrome() {
+  const copy = UI[lang];
+  document.documentElement.lang = lang === "bg" ? "bg" : "en";
+  document.title = copy.title;
+  document.getElementById("page-title").textContent = copy.title;
+  document.getElementById("page-lede").textContent = copy.lede;
+  document.querySelector('label[for="q"]').textContent = copy.search;
+  input.placeholder = copy.placeholder;
+  document.getElementById("clear").textContent = copy.clear;
+  document.getElementById("age-label").textContent = copy.age;
+  document.getElementById("kind-label").textContent = copy.kind;
+  document.getElementById("age-group").setAttribute("aria-label", copy.age);
+  document.getElementById("kind-group").setAttribute("aria-label", copy.kind);
+  document.getElementById("label-movement").textContent = copy.movement;
+  document.getElementById("label-brain").textContent = copy.brain;
+  document.getElementById("page-syntax").innerHTML = copy.syntax;
+  document.getElementById("note-title").textContent = copy.noteTitle;
+  document.getElementById("note-body").textContent = copy.note;
+  document.getElementById("page-kit").textContent = copy.kit;
+  for (const button of ageButtons) button.textContent = copy.ages[button.dataset.age];
+  for (const button of document.querySelectorAll("[data-lang]")) {
+    button.setAttribute("aria-pressed", button.dataset.lang === lang ? "true" : "false");
+  }
+  localStorage.setItem("play-plan-lang", lang);
+}
+
+input.addEventListener("input", render);
+document.getElementById("search-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  render();
+});
+document.getElementById("clear").addEventListener("click", () => {
+  input.value = "";
+  for (const button of [...ageButtons, ...kindButtons]) button.setAttribute("aria-pressed", "false");
+  render();
+  input.focus();
+});
+for (const button of kindButtons) {
+  button.addEventListener("click", () => {
+    const on = button.getAttribute("aria-pressed") === "true";
+    button.setAttribute("aria-pressed", on ? "false" : "true");
+    render();
+  });
+}
+for (const button of ageButtons) {
+  button.addEventListener("click", () => {
+    const wasOn = button.getAttribute("aria-pressed") === "true";
+    for (const other of ageButtons) other.setAttribute("aria-pressed", "false");
+    if (!wasOn) button.setAttribute("aria-pressed", "true");
+    render();
+    if (!wasOn) {
+      const target = document.getElementById("section-" + button.dataset.age);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+}
+document.addEventListener("click", (event) => {
+  const expand = event.target.closest("[data-expand]");
+  if (expand) {
+    const section = document.getElementById("section-" + expand.dataset.expand);
+    if (section) for (const details of section.querySelectorAll("details.game")) details.open = true;
+    return;
+  }
+  const collapse = event.target.closest("[data-collapse]");
+  if (collapse) {
+    const section = document.getElementById("section-" + collapse.dataset.collapse);
+    if (section) for (const details of section.querySelectorAll("details.game")) details.open = false;
+    return;
+  }
+  const link = event.target.closest("a.toc-link, #section-nav a");
+  if (!link) return;
+  const id = (link.getAttribute("href") || "").slice(1);
+  const target = document.getElementById(id);
+  if (!target) return;
+  event.preventDefault();
+  const details = target.matches("details") ? target : target.querySelector("details");
+  if (details) details.open = true;
+  target.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+results.addEventListener("change", (event) => {
+  const box = event.target;
+  if (!(box instanceof HTMLInputElement) || !box.dataset.tried) return;
+  tried[box.dataset.tried] = box.checked;
+  localStorage.setItem(TRIED_KEY, JSON.stringify(tried));
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "/" && document.activeElement !== input) {
+    event.preventDefault();
+    input.focus();
+    input.select();
+  }
+  if (event.key === "Escape" && document.activeElement === input) {
+    input.value = "";
+    render();
+  }
+});
+
+const topButton = document.getElementById("to-top");
+const headerEl = document.querySelector("header.top");
+let sectionObserver = null;
+
+function watchSections() {
+  if (sectionObserver) sectionObserver.disconnect();
+  const links = [...document.querySelectorAll("#section-nav a[data-section]")];
+  const bands = [...document.querySelectorAll(".band[data-section]")];
+  if (!bands.length) return;
+  sectionObserver = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter((entry) => entry.isIntersecting)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (!visible) return;
+    const id = visible.target.dataset.section;
+    for (const link of links) link.classList.toggle("active", link.dataset.section === id);
+  }, { rootMargin: "-30% 0px -55% 0px", threshold: [0.1, 0.3, 0.6] });
+  for (const band of bands) sectionObserver.observe(band);
+}
+
+window.addEventListener("scroll", () => {
+  headerEl.classList.toggle("compact", window.scrollY > 80);
+  topButton.classList.toggle("show", window.scrollY > 400);
+}, { passive: true });
+topButton.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+const initial = readState();
+lang = initial.lang;
+input.value = initial.q;
+syncButtons(initial.ages, initial.kinds);
+applyChrome();
+render();
+for (const button of document.querySelectorAll("[data-lang]")) {
+  button.addEventListener("click", () => {
+    lang = button.dataset.lang;
+    applyChrome();
+    render();
+  });
+}
+</script>
+</body>
+</html>
